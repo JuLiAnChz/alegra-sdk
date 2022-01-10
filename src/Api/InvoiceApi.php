@@ -3,12 +3,10 @@
 namespace Alegra\SDK\Api;
 
 use Alegra\SDK\Configuration;
+use Alegra\SDK\Exceptions\ApiException;
 use Alegra\SDK\Request;
-use GuzzleHttp\Exception\RequestException;
-use GuzzleHttp\Exception\ClientException;
 use GuzzleHttp\Psr7\Uri;
 use InvalidArgumentException;
-use Exception;
 
 class InvoiceApi
 {
@@ -30,13 +28,7 @@ class InvoiceApi
 		try {
 			$Invoice = $this->request->findById($invoiceId);
 			return $Invoice;
-		} catch (InvalidArgumentException $e) {
-			throw $e;
-		} catch (RequestException $e) {
-			throw $e;
-		} catch (Exception $e) {
-			throw $e;
-		} catch (ClientException $e) {
+		} catch (ApiException $e) {
 			throw $e;
 		}
 	}
@@ -46,13 +38,7 @@ class InvoiceApi
 		try {
 			$Invoices = $this->request->findAll($parameters);
 			return $Invoices;
-		} catch (InvalidArgumentException $e) {
-			throw $e;
-		} catch (RequestException $e) {
-			throw $e;
-		} catch (Exception $e) {
-			throw $e;
-		} catch (ClientException $e) {
+		} catch (ApiException $e) {
 			throw $e;
 		}
 	}
@@ -62,13 +48,7 @@ class InvoiceApi
 		try {
 			$Invoice = $this->request->create($body);
 			return $Invoice;
-		} catch (InvalidArgumentException $e) {
-			throw $e;
-		} catch (RequestException $e) {
-			throw $e;
-		} catch (Exception $e) {
-			throw $e;
-		} catch (ClientException $e) {
+		} catch (ApiException $e) {
 			throw $e;
 		}
 	}
@@ -78,13 +58,7 @@ class InvoiceApi
 		try {
 			$Invoice = $this->request->update($invoiceId, $bodyParams);
 			return $Invoice;
-		} catch (InvalidArgumentException $e) {
-			throw $e;
-		} catch (RequestException $e) {
-			throw $e;
-		} catch (Exception $e) {
-			throw $e;
-		} catch (ClientException $e) {
+		} catch (ApiException $e) {
 			throw $e;
 		}
 	}
@@ -94,13 +68,7 @@ class InvoiceApi
 		try {
 			$Invoice = $this->sendEmailInvoiceRequest($invoiceId, $bodyParams);
 			return $Invoice;
-		} catch (InvalidArgumentException $e) {
-			throw $e;
-		} catch (RequestException $e) {
-			throw $e;
-		} catch (Exception $e) {
-			throw $e;
-		} catch (ClientException $e) {
+		} catch (ApiException $e) {
 			throw $e;
 		}
 	}
@@ -132,13 +100,7 @@ class InvoiceApi
 		try {
 			$Invoice = $this->request->delete($invoiceId);
 			return $Invoice;
-		} catch (InvalidArgumentException $e) {
-			throw $e;
-		} catch (RequestException $e) {
-			throw $e;
-		} catch (Exception $e) {
-			throw $e;
-		} catch (ClientException $e) {
+		} catch (ApiException $e) {
 			throw $e;
 		}
 	}

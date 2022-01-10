@@ -3,10 +3,14 @@
 namespace Alegra\SDK;
 
 use Alegra\SDK\Exceptions\ApiException;
+use Alegra\SDK\Models\AlegraLog;
 use GuzzleHttp\Client;
 use GuzzleHttp\ClientInterface;
 use GuzzleHttp\Psr7\Uri;
+use GuzzleHttp\Exception\RequestException;
+use GuzzleHttp\Exception\ClientException;
 use InvalidArgumentException;
+use Exception;
 
 class Request
 {
@@ -44,25 +48,55 @@ class Request
 		}
 
 		$uri = new Uri($this->config->getHost() . "/{$this->path}/" . $id);
+		// Generate log FIXME: unorthodox
+		$AlegraLog = new AlegraLog();
+		$AlegraLog->service = $uri->getPath();
+		$AlegraLog->save();
 
-		$response = $this->client->request('GET', $uri, [
+		$AlegraLog->request = json_encode([
 			'headers' => $headers
 		]);
 
-		$statusCode = $response->getStatusCode();
+		try {
+			$response = $this->client->request('GET', $uri, [
+				'headers' => $headers
+			]);
 
-		if ($statusCode < 200 || $statusCode > 299) {
-			throw new ApiException(
-				sprintf('[%d] Error connecting to the API (%s)', $statusCode, $uri->getPath()),
-				$statusCode,
-				$response->getHeaders(),
-				$response->getBody()
-			);
+			$statusCode = $response->getStatusCode();
+
+
+			$AlegraLog->status_code = $statusCode;
+			$AlegraLog->response = $response->getBody();
+			$AlegraLog->save();
+
+			if ($statusCode < 200 || $statusCode > 299) {
+				throw new ApiException(
+					sprintf('[%d] Error connecting to the API (%s)', $statusCode, $uri->getPath()),
+					$statusCode,
+					$response->getHeaders(),
+					$response->getBody()
+				);
+			}
+
+			$responseBody = json_decode($response->getBody());
+
+			return $responseBody;
+		} catch (RequestException $e) {
+			$AlegraLog->status_code = $e->getCode();
+			$AlegraLog->response = $e->getResponse()->getBody();
+			$AlegraLog->save();
+			throw $e;
+		} catch (Exception $e) {
+			$AlegraLog->status_code = $e->getCode();
+			$AlegraLog->response = $e->getMessage();
+			$AlegraLog->save();
+			throw $e;
+		} catch (ClientException $e) {
+			$AlegraLog->status_code = $e->getCode();
+			$AlegraLog->response = $e->getResponse()->getBody();
+			$AlegraLog->save();
+			throw $e;
 		}
-
-		$responseBody = json_decode($response->getBody());
-
-		return $responseBody;
 	}
 
 	public function findAll($parameters = [])
@@ -78,24 +112,53 @@ class Request
 		if (count($parameters) > 0) {
 			$uri = $uri->withQuery(http_build_query($parameters));
 		}
+		// Generate log FIXME: unorthodox
+		$AlegraLog = new AlegraLog();
+		$AlegraLog->service = $uri->getPath();
+		$AlegraLog->save();
 
-		$response = $this->client->request('GET', $uri, [
+		$AlegraLog->request = json_encode([
 			'headers' => $headers
 		]);
 
-		$statusCode = $response->getStatusCode();
+		try {
+			$response = $this->client->request('GET', $uri, [
+				'headers' => $headers
+			]);
 
-		if ($statusCode < 200 || $statusCode > 299) {
-			throw new ApiException(
-				sprintf('[%d] Error connecting to the API (%s)', $statusCode, $uri->getPath()),
-				$statusCode,
-				$response->getHeaders(),
-				$response->getBody()
-			);
+			$statusCode = $response->getStatusCode();
+
+			$AlegraLog->status_code = $statusCode;
+			$AlegraLog->response = $response->getBody();
+			$AlegraLog->save();
+
+			if ($statusCode < 200 || $statusCode > 299) {
+				throw new ApiException(
+					sprintf('[%d] Error connecting to the API (%s)', $statusCode, $uri->getPath()),
+					$statusCode,
+					$response->getHeaders(),
+					$response->getBody()
+				);
+			}
+
+			$responseBody = json_decode($response->getBody());
+			return $responseBody;
+		} catch (RequestException $e) {
+			$AlegraLog->status_code = $e->getCode();
+			$AlegraLog->response = $e->getResponse()->getBody();
+			$AlegraLog->save();
+			throw $e;
+		} catch (Exception $e) {
+			$AlegraLog->status_code = $e->getCode();
+			$AlegraLog->response = $e->getMessage();
+			$AlegraLog->save();
+			throw $e;
+		} catch (ClientException $e) {
+			$AlegraLog->status_code = $e->getCode();
+			$AlegraLog->response = $e->getResponse()->getBody();
+			$AlegraLog->save();
+			throw $e;
 		}
-
-		$responseBody = json_decode($response->getBody());
-		return $responseBody;
 	}
 
 	public function create($body = null)
@@ -110,24 +173,55 @@ class Request
 
 		$uri = new Uri($this->config->getHost() . "/{$this->path}");
 
-		$response = $this->client->request('POST', $uri, [
+		// Generate log FIXME: unorthodox
+		$AlegraLog = new AlegraLog();
+		$AlegraLog->service = $uri->getPath();
+		$AlegraLog->save();
+
+		$AlegraLog->request = json_encode([
 			'headers' => $headers,
 			\GuzzleHttp\RequestOptions::JSON => $body
 		]);
 
-		$statusCode = $response->getStatusCode();
+		try {
+			$response = $this->client->request('POST', $uri, [
+				'headers' => $headers,
+				\GuzzleHttp\RequestOptions::JSON => $body
+			]);
 
-		if ($statusCode < 200 || $statusCode > 299) {
-			throw new ApiException(
-				sprintf('[%d] Error connecting to the API (%s)', $statusCode, $uri->getPath()),
-				$statusCode,
-				$response->getHeaders(),
-				$response->getBody()
-			);
+			$statusCode = $response->getStatusCode();
+
+			$AlegraLog->status_code = $statusCode;
+			$AlegraLog->response = $response->getBody();
+			$AlegraLog->save();
+
+			if ($statusCode < 200 || $statusCode > 299) {
+				throw new ApiException(
+					sprintf('[%d] Error connecting to the API (%s)', $statusCode, $uri->getPath()),
+					$statusCode,
+					$response->getHeaders(),
+					$response->getBody()
+				);
+			}
+
+			$responseBody = json_decode($response->getBody());
+			return $responseBody;
+		} catch (RequestException $e) {
+			$AlegraLog->status_code = $e->getCode();
+			$AlegraLog->response = $e->getResponse()->getBody();
+			$AlegraLog->save();
+			throw $e;
+		} catch (Exception $e) {
+			$AlegraLog->status_code = $e->getCode();
+			$AlegraLog->response = $e->getMessage();
+			$AlegraLog->save();
+			throw $e;
+		} catch (ClientException $e) {
+			$AlegraLog->status_code = $e->getCode();
+			$AlegraLog->response = $e->getResponse()->getBody();
+			$AlegraLog->save();
+			throw $e;
 		}
-
-		$responseBody = json_decode($response->getBody());
-		return $responseBody;
 	}
 
 	public function update(int $id, $bodyParams = [])
@@ -142,24 +236,55 @@ class Request
 
 		$uri = new Uri($this->config->getHost() . "/{$this->path}/" . $id);
 
-		$response = $this->client->request('PUT', $uri, [
+		// Generate log FIXME: unorthodox
+		$AlegraLog = new AlegraLog();
+		$AlegraLog->service = $uri->getPath();
+		$AlegraLog->save();
+
+		$AlegraLog->request = json_encode([
 			'headers' => $headers,
 			\GuzzleHttp\RequestOptions::JSON => $bodyParams
 		]);
 
-		$statusCode = $response->getStatusCode();
+		try {
+			$response = $this->client->request('PUT', $uri, [
+				'headers' => $headers,
+				\GuzzleHttp\RequestOptions::JSON => $bodyParams
+			]);
 
-		if ($statusCode < 200 || $statusCode > 299) {
-			throw new ApiException(
-				sprintf('[%d] Error connecting to the API (%s)', $statusCode, $uri->getPath()),
-				$statusCode,
-				$response->getHeaders(),
-				$response->getBody()
-			);
+			$statusCode = $response->getStatusCode();
+
+			$AlegraLog->status_code = $statusCode;
+			$AlegraLog->response = $response->getBody();
+			$AlegraLog->save();
+
+			if ($statusCode < 200 || $statusCode > 299) {
+				throw new ApiException(
+					sprintf('[%d] Error connecting to the API (%s)', $statusCode, $uri->getPath()),
+					$statusCode,
+					$response->getHeaders(),
+					$response->getBody()
+				);
+			}
+
+			$responseBody = json_decode($response->getBody());
+			return $responseBody;
+		} catch (RequestException $e) {
+			$AlegraLog->status_code = $e->getCode();
+			$AlegraLog->response = $e->getResponse()->getBody();
+			$AlegraLog->save();
+			throw $e;
+		} catch (Exception $e) {
+			$AlegraLog->status_code = $e->getCode();
+			$AlegraLog->response = $e->getMessage();
+			$AlegraLog->save();
+			throw $e;
+		} catch (ClientException $e) {
+			$AlegraLog->status_code = $e->getCode();
+			$AlegraLog->response = $e->getResponse()->getBody();
+			$AlegraLog->save();
+			throw $e;
 		}
-
-		$responseBody = json_decode($response->getBody());
-		return $responseBody;
 	}
 
 	public function delete(int $id)
@@ -174,22 +299,52 @@ class Request
 
 		$uri = new Uri($this->config->getHost() . "/{$this->path}/" . $id);
 
-		$response = $this->client->request('DELETE', $uri, [
+		// Generate log FIXME: unorthodox
+		$AlegraLog = new AlegraLog();
+		$AlegraLog->service = $uri->getPath();
+		$AlegraLog->save();
+
+		$AlegraLog->request = json_encode([
 			'headers' => $headers
 		]);
 
-		$statusCode = $response->getStatusCode();
+		try {
+			$response = $this->client->request('DELETE', $uri, [
+				'headers' => $headers
+			]);
 
-		if ($statusCode < 200 || $statusCode > 299) {
-			throw new ApiException(
-				sprintf('[%d] Error connecting to the API (%s)', $statusCode, $uri->getPath()),
-				$statusCode,
-				$response->getHeaders(),
-				$response->getBody()
-			);
+			$statusCode = $response->getStatusCode();
+
+			$AlegraLog->status_code = $statusCode;
+			$AlegraLog->response = $response->getBody();
+			$AlegraLog->save();
+
+			if ($statusCode < 200 || $statusCode > 299) {
+				throw new ApiException(
+					sprintf('[%d] Error connecting to the API (%s)', $statusCode, $uri->getPath()),
+					$statusCode,
+					$response->getHeaders(),
+					$response->getBody()
+				);
+			}
+
+			$responseBody = json_decode($response->getBody());
+			return $responseBody;
+		} catch (RequestException $e) {
+			$AlegraLog->status_code = $e->getCode();
+			$AlegraLog->response = $e->getResponse()->getBody();
+			$AlegraLog->save();
+			throw $e;
+		} catch (Exception $e) {
+			$AlegraLog->status_code = $e->getCode();
+			$AlegraLog->response = $e->getMessage();
+			$AlegraLog->save();
+			throw $e;
+		} catch (ClientException $e) {
+			$AlegraLog->status_code = $e->getCode();
+			$AlegraLog->response = $e->getResponse()->getBody();
+			$AlegraLog->save();
+			throw $e;
 		}
-
-		$responseBody = json_decode($response->getBody());
-		return $responseBody;
 	}
 }
