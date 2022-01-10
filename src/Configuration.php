@@ -2,13 +2,18 @@
 
 namespace Alegra\SDK;
 
-$GLOBALS['version'] = '1.0.0';
-
 class Configuration
 {
-	protected $host = 'https://api.alegra.com/api/v1';
-	protected $accessToken = '';
-	protected $authorization = 'Basic';
+	protected $host;
+	protected $accessToken;
+	protected $authorization;
+
+	public function __construct()
+	{
+		$this->host = config('alegra.base_uri', '');
+		$this->accessToken = config('alegra.access_token');
+		$this->authorization = config('alegra.authorization');
+	}
 
 	public function setAccessToken($token)
 	{
